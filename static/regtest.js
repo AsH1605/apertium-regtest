@@ -450,7 +450,9 @@ function btn_gold_replace() {
 	let s = tr.find('.nav-link.active').text();
 	let gs = [tr.find('.rt-output.active').attr('data-output')];
 	let tid = toast('Replacing Gold', 'Corpus '+c+' sentence '+h+' step '+s);
-	post({a: 'gold', c: c, h: h, s: s, gs: JSON.stringify(gs)}).done(function(rv) { $(tid).toast('hide'); cb_accept(rv); });
+	if (confirm('Are you sure you want to save the changes?')) {
+		post({a: 'gold', c: c, h: h, s: s, gs: JSON.stringify(gs)}).done(function(rv) { $(tid).toast('hide'); cb_accept(rv); });
+	}
 }
 
 function btn_gold_add() {
@@ -465,7 +467,9 @@ function btn_gold_add() {
 	}
 	gs.push(tr.find('.rt-output.active').attr('data-output'));
 	let tid = toast('Adding Gold', 'Corpus '+c+' sentence '+h+' step '+s);
-	post({a: 'gold', c: c, h: h, s: s, gs: JSON.stringify(gs)}).done(function(rv) { $(tid).toast('hide'); cb_accept(rv); });
+	if (confirm('Are you sure you want to save the changes?')) {
+		post({a: 'gold', c: c, h: h, s: s, gs: JSON.stringify(gs)}).done(function(rv) { $(tid).toast('hide'); cb_accept(rv); });
+	}
 }
 
 function btn_gold_manual() {
