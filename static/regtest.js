@@ -450,9 +450,7 @@ function btn_gold_replace() {
 	let s = tr.find('.nav-link.active').text();
 	let gs = [tr.find('.rt-output.active').attr('data-output')];
 	let tid = toast('Replacing Gold', 'Corpus '+c+' sentence '+h+' step '+s);
-	if (confirm('Are you sure you want to save the changes?')) {
-		post({a: 'gold', c: c, h: h, s: s, gs: JSON.stringify(gs)}).done(function(rv) { $(tid).toast('hide'); cb_accept(rv); });
-	}
+	post({a: 'gold', c: c, h: h, s: s, gs: JSON.stringify(gs)}).done(function(rv) { $(tid).toast('hide'); cb_accept(rv); });
 }
 
 function btn_gold_add() {
@@ -467,9 +465,7 @@ function btn_gold_add() {
 	}
 	gs.push(tr.find('.rt-output.active').attr('data-output'));
 	let tid = toast('Adding Gold', 'Corpus '+c+' sentence '+h+' step '+s);
-	if (confirm('Are you sure you want to save the changes?')) {
-		post({a: 'gold', c: c, h: h, s: s, gs: JSON.stringify(gs)}).done(function(rv) { $(tid).toast('hide'); cb_accept(rv); });
-	}
+	post({a: 'gold', c: c, h: h, s: s, gs: JSON.stringify(gs)}).done(function(rv) { $(tid).toast('hide'); cb_accept(rv); });
 }
 
 function btn_gold_manual() {
@@ -778,6 +774,61 @@ function cb_init(rv) {
 	$('.btnFilterGold').off().click(btn_filter_gold);
 }
 
+function btn_gold_edit() {
+    let tr = $(this).closest('tr'); 
+    let c = tr.attr('data-corp'); 
+    let h = tr.attr('data-hash');
+    let s = tr.find('.nav-link.active').text(); 
+    let gs = [];
+    let gold = state[c].cmds[state[c].cmds.length - 1].gold;
+
+    if (gold.hasOwnProperty(h)) {
+        gs = gold[h]; 
+    }
+
+    let currentGold = $(this).text(); 
+    let newGold = prompt('Edit Gold:', currentGold); 
+
+    if (newGold !== null && newGold.trim() !== '') {
+        let index = gs.indexOf(currentGold); 
+        if (index !== -1) {
+            gs[index] = newGold; 
+        }
+        let tid = toast('Editing Gold', 'Corpus ' + c + ' sentence ' + h + ' step ' + s);
+        post({ a: 'gold', c: c, h: h, s: s, gs: JSON.stringify(gs) }).done(function (rv) {
+            $(tid).toast('hide');
+            cb_accept(rv);
+        });
+    }
+}
+
+function btn_gold_delete() {
+    let tr = $(this).closest('tr'); 
+    let c = tr.attr('data-corp'); 
+    let h = tr.attr('data-hash'); 
+    let s = tr.find('.nav-link.active').text(); 
+    let gs = [];
+    let gold = state[c].cmds[state[c].cmds.length - 1].gold; 
+
+    if (gold.hasOwnProperty(h)) {
+        gs = gold[h]; 
+    }
+
+    let currentGold = $(this).text(); 
+    if (confirm('Are you sure you want to delete this gold: ' + currentGold + '?')) {
+        let index = gs.indexOf(currentGold); 
+        if (index !== -1) {
+            gs.splice(index, 1); 
+        }
+        let tid = toast('Deleting Gold', 'Corpus ' + c + ' sentence ' + h + ' step ' + s);
+        post({ a: 'gold', c: c, h: h, s: s, gs: JSON.stringify(gs) }).done(function (rv) {
+            $(tid).toast('hide');
+            cb_accept(rv);
+        });
+    }
+}
+
+
 function cb_load(rv) {
 	$('.rt-added,.rt-deleted,.rt-add-del-warn,.rt-deleted').hide();
 	$('#rt-added,#rt-deleted').find('tbody').remove();
@@ -789,6 +840,17 @@ function cb_load(rv) {
 	let nd_corps = {};
 
 	state = rv.state;
+
+	$(document).on('click', '.rt-gold li', function () {
+		let $goldItem = $(this);
+		let action = prompt('Choose Action: (edit/delete)', 'edit');
+		if (action === 'edit') {
+			btn_gold_edit.call($goldItem);
+		} else if (action === 'delete') {
+			btn_gold_delete.call($goldItem);
+		}
+	});
+
 
 	let pages = '';
 	if (state._pages > 1) {
