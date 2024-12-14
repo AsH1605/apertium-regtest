@@ -774,25 +774,25 @@ function cb_init(rv) {
 	$('.btnFilterGold').off().click(btn_filter_gold);
 }
 
-function btn_gold_edit() {
-    let tr = $(this).closest('tr'); 
-    let c = tr.attr('data-corp'); 
+function btn_gold_edit(goldText) {
+    let tr = $(this).closest('tr');
+    let c = tr.attr('data-corp');
     let h = tr.attr('data-hash');
-    let s = tr.find('.nav-link.active').text(); 
+    let s = tr.find('.nav-link.active').text();
     let gs = [];
     let gold = state[c].cmds[state[c].cmds.length - 1].gold;
 
     if (gold.hasOwnProperty(h)) {
-        gs = gold[h]; 
+        gs = gold[h];
     }
 
-    let currentGold = $(this).text(); 
-    let newGold = prompt('Edit Gold:', currentGold); 
+    let currentGold = goldText; 
+    let newGold = prompt('Edit Gold:', currentGold);
 
     if (newGold !== null && newGold.trim() !== '') {
-        let index = gs.indexOf(currentGold); 
+        let index = gs.indexOf(currentGold);
         if (index !== -1) {
-            gs[index] = newGold; 
+            gs[index] = newGold;
         }
         let tid = toast('Editing Gold', 'Corpus ' + c + ' sentence ' + h + ' step ' + s);
         post({ a: 'gold', c: c, h: h, s: s, gs: JSON.stringify(gs) }).done(function (rv) {
@@ -802,30 +802,50 @@ function btn_gold_edit() {
     }
 }
 
+
 function btn_gold_delete() {
-    let tr = $(this).closest('tr'); 
-    let c = tr.attr('data-corp'); 
-    let h = tr.attr('data-hash'); 
-    let s = tr.find('.nav-link.active').text(); 
+    let li = $(this).closest('li'); 
+    let tr = li.closest('tr'); 
+    let c = tr.attr('data-corp');
+    let h = tr.attr('data-hash');
+    let s = tr.find('.nav-link.active').text();
     let gs = [];
-    let gold = state[c].cmds[state[c].cmds.length - 1].gold; 
+    let gold = state[c].cmds[state[c].cmds.length-1].gold;
 
     if (gold.hasOwnProperty(h)) {
-        gs = gold[h]; 
+        gs = gold[h];
     }
 
-    let currentGold = $(this).text(); 
-    if (confirm('Are you sure you want to delete this gold: ' + currentGold + '?')) {
-        let index = gs.indexOf(currentGold); 
-        if (index !== -1) {
-            gs.splice(index, 1); 
-        }
-        let tid = toast('Deleting Gold', 'Corpus ' + c + ' sentence ' + h + ' step ' + s);
-        post({ a: 'gold', c: c, h: h, s: s, gs: JSON.stringify(gs) }).done(function (rv) {
-            $(tid).toast('hide');
-            cb_accept(rv);
-        });
+    let currentGold = li.text().trim(); 
+    let index = gs.indexOf(currentGold);
+    if (index !== -1) {
+        gs.splice(index, 1); 
     }
+
+    let tid = toast('Deleting Gold', 'Corpus ' + c + ' sentence ' + h + ' step ' + s);
+    post({ a: 'gold', c: c, h: h, s: s, gs: JSON.stringify(gs) }).done(function (rv) {
+        $(tid).toast('hide');
+        cb_accept(rv);
+    });
+
+    li.remove();
+}
+
+
+function make_gold_list(golds) {
+    let ul = '<ul class="list-group rt-gold">';
+    ul += golds.map(g => {
+        return `
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span class="gold-text">${esc_html(g)}</span>
+                <div class="btn-container">
+                    <button type="button" class="btn btn-sm btn-outline-info my-2 btnEditGold">Edit</button>
+                    <button type="button" class="btn btn-sm btn-outline-danger my-2 btnDeleteGold">Delete</button>
+                </div>
+            </li>`;
+    }).join('');
+    ul += '</ul>';
+    return ul;
 }
 
 
@@ -841,15 +861,15 @@ function cb_load(rv) {
 
 	state = rv.state;
 
-	$(document).on('click', '.rt-gold li', function () {
-		let $goldItem = $(this);
-		let action = prompt('Choose Action: (edit/delete)', 'edit');
-		if (action === 'edit') {
-			btn_gold_edit.call($goldItem);
-		} else if (action === 'delete') {
-			btn_gold_delete.call($goldItem);
-		}
+	$(document).on('click', '.rt-gold .btnEditGold', function () {
+		let li = $(this).closest('li');  
+		let goldText = li.find('.gold-text').text();  
+		btn_gold_edit.call(this, goldText);  
 	});
+	
+	$(document).on('click', '.rt-gold .btnDeleteGold', function () {
+		btn_gold_delete.call(this); 
+	});	
 
 
 	let pages = '';
