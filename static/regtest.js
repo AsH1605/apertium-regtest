@@ -474,13 +474,6 @@ function btn_gold_manual() {
 	tr.find('.rt-gold-input').show().find('input').val(val);
 }
 
-function make_gold_list(golds) {
-	let ul = '<ul class="list-group rt-gold">';
-	ul += golds.map(g => '<li class="list-group-item">'+esc_html(g)+'</li>').join('');
-	ul += '</ul>';
-	return ul;
-}
-
 function btn_gold_manual_accept() {
 	let tr = $(this).closest('tr');
 	let c = tr.attr('data-corp');
