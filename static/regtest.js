@@ -864,7 +864,6 @@ function cb_load(rv) {
 		btn_gold_delete.call(this); 
 	});	
 
-
 	let pages = '';
 	if (state._pages > 1) {
 		pages += '<ul class="pagination"><li class="page-item"><a class="page-link rt-page rt-page-prev" href="#" data-which="prev">&laquo;</a></li>';
